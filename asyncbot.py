@@ -7,7 +7,7 @@ import logging
 
 from aiogram import Bot, Dispatcher, executor, types
 
-import weather_step, config
+import weather_step, config,NLP
 
 API_TOKEN = config.TG_TOKEN
 
@@ -27,29 +27,11 @@ async def send_welcome(message: types.Message):
     await message.reply("Hi!\nI'm EchoBot!\nPowered by aiogram.")
 
 @dp.message_handler()
-async def weather(message: types.Message):
+async def not_a_comand(message: types.Message):
     """
     This handler will
     """
-    if "погода" in message.text.split():
-
-        await message.reply(f'Hi!\n {weather_step.get_wheater(message.text.split()[-1],config.open_weather_token)}')
-
-    else: 
-        pass
-
-
-
-
-
-@dp.message_handler()
-async def echo(message: types.Message):
-    # old style:
-    # await bot.send_message(message.chat.id, message.text)
-
-    await message.answer(message.text)
-
-
+    await message.reply(f'{NLP.text_handler(message.text)}')
 
 
 if __name__ == '__main__':
