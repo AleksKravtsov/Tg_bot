@@ -1,3 +1,8 @@
+from config import open_weather_token
+import requests
+import datetime
+from pprint import pprint
+
 def get_wheater(city, open_weather_token):
     
     code_to_smile = {
