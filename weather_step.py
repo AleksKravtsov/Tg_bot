@@ -38,7 +38,7 @@ def get_wheater(city, open_weather_token):
         pressure = data['main']['pressure']
         wind = data['wind']['speed']
 
-        print(f'***{datetime.datetime.now().strftime("%d-%m-%Y %H:%M")}***\n'
+        return(f'***{datetime.datetime.now().strftime("%d-%m-%Y %H:%M")}***\n'
               f'Погода в городе: {city}\nТемпература: {cur_weather}C° {wd}\n'
               f'Влажность: {humidity}\nДавление: {pressure} мм.рт.ст\n'
               f'Скорость ветра: {wind} м/c')
@@ -46,14 +46,4 @@ def get_wheater(city, open_weather_token):
 
     except Exception as ex:
         print(ex)
-        print('Проверьте название города')
-
-
-def main():
-    city = input('Введите город: ')
-    get_wheater(city, open_weather_token)
-    pass
-
-
-if __name__ == '__main__':
-    main()
+        return('Проверьте название города')
