@@ -7,7 +7,7 @@ import logging
 
 from aiogram import Bot, Dispatcher, executor, types
 
-import weather_step, config,NLP
+import config,NLP
 
 API_TOKEN = config.TG_TOKEN
 

@@ -2,6 +2,27 @@ from config import open_weather_token
 import requests
 import datetime
 from pprint import pprint
+import requests
+import random
+
+api_link = "https://api.kinopoisk.dev/"
+
+
+
+def random_film(kp_token):
+
+    r = random.randrange(1,3000,1)
+    params = {
+        "token":kp_token,
+        "field":["rating.kp","year"],
+        "search":["7-9","2018-2022"],
+        "limit":1,
+        "page":r
+        }
+
+    response = requests.get(api_link+"movie", params=params)
+    film = response.json()
+    return "https://www.kinopoisk.ru/film/"+str(film["docs"][0]["id"])
 
 def get_wheater(city, open_weather_token):
     
