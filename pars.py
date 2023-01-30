@@ -1,8 +1,5 @@
 from config import open_weather_token
 import requests
-import datetime
-from pprint import pprint
-import requests
 import random
 
 api_link = "https://api.kinopoisk.dev/"
@@ -59,8 +56,7 @@ def get_wheater(city, open_weather_token):
         pressure = data['main']['pressure']
         wind = data['wind']['speed']
 
-        return(f'***{datetime.datetime.now().strftime("%d-%m-%Y %H:%M")}***\n'
-              f'Погода в городе: {city}\nТемпература: {cur_weather}C° {wd}\n'
+        return(f'Погода в городе: {city}\nТемпература: {cur_weather}C° {wd}\n'
               f'Влажность: {humidity}\nДавление: {pressure} мм.рт.ст\n'
               f'Скорость ветра: {wind} м/c')
 
