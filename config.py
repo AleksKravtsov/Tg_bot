@@ -1,5 +1,5 @@
-open_weather_token = 'dd8a95e67a5b6fff5c6d0f144625c97c'
+open_weather_token = 'вставьте токен сюда'
 
-TG_TOKEN = '5101553841:AAGdkJ-tfJADXEBPlnPDB7S9i6Bxw8-sCz0'
+TG_TOKEN = 'вставьте токен сюда'
 
-kp_token = "BPMS9F1-X504AHG-MCQRBVP-H6SNK0B"
+kp_token = "вставьте токен сюда"

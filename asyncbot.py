@@ -13,14 +13,14 @@ from gensim.models import Word2Vec, FastText
 import gensim
 import annoy
 
+# translation
+from transformers import FSMTForConditionalGeneration, FSMTTokenizer
+from langdetect import detect
+
 from tqdm.notebook import tqdm
 import numpy as np
 
-# import fuzz
-
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
-
+from fuzzywuzzy import fuzz, process
 
 import logging
 
@@ -30,38 +30,55 @@ import config
 
 import pars, random
 
+"""Loading text files""" 
 
-with open("cities.txt", "r", encoding="utf-8") as file:
+with open("TXT/cities.txt", "r", encoding="utf-8") as file:
     city_list = file.readlines()[0].lower().split()
     file.close()
 
-with open("film_frase.txt", "r", encoding="utf-8") as file:
+with open("TXT/film_frase.txt", "r", encoding="utf-8") as file:
     film_phrase = file.readlines()[0].lower().split(",")
     file.close()
 
-"""Подгружаю модели""" 
+with open("TXT/bye.txt", "r", encoding="utf-8") as file:
+    bye = file.readlines()[0].lower().split(",")
+    file.close()
+
+"""Loading Models""" 
 
 print("Loading models...") 
 
 with open('NLP/index_map.txt') as json_file:
     index_map = json.load(json_file)
 
-#w2v_index = annoy.AnnoyIndex(300 ,'angular')
+w2v_index = annoy.AnnoyIndex(300 ,'angular')
 ft_index = annoy.AnnoyIndex(300 ,'angular')
 
 print("Json - Done")
 
-#w2v_index.load('w2v_index')
+w2v_index.load('NLP/w2v_index')
 ft_index.load('NLP/ft_index')
 
 print("Index - Done")
 
 
-#modelW2V = Word2Vec.load('w2v_model') 
+modelW2V = Word2Vec.load('NLP/w2v_model') 
 model_ft = FastText.load('NLP/ft_model')
 
+# с англ на рус
+en_model = "facebook/wmt19-en-ru"
+# с рус на англ
+ru_model = "facebook/wmt19-ru-en"
+
+tokenizer_en = FSMTTokenizer.from_pretrained(en_model)
+tokenizer_ru = FSMTTokenizer.from_pretrained(ru_model)
+en_to_ru = FSMTForConditionalGeneration.from_pretrained(en_model)
+ru_to_en = FSMTForConditionalGeneration.from_pretrained(ru_model)
+
+print("Translate - Done")
+
 print("Models - Done\n Loading complete!")
-"""Готово""" 
+"""Ready""" 
 
 
 morpher = MorphAnalyzer()
@@ -73,7 +90,6 @@ def preprocess_txt(text):
     text = re.sub(r'<.*?>', ' ', text)
     text = re.sub(r'.*:', ' ', text)
     text = "".join(i for i in text.strip() if i not in exclude).split()
-    # text = re.sub(fr'[{string.punctuation}]+', ' ', text)
     text = [morpher.parse(i.lower())[0].normal_form for i in text]
     text = [i for i in text if i not in sw and i != ""]
     return text
@@ -99,9 +115,10 @@ def get_response(question, index, model, index_map, count_answer=3):
 """NLP PART TEMP!"""
 
 
-def is_movie(text):
+def is_phrase(text, phrases):
     max_fuzz = 0
-    for i in film_phrase:
+    text = text.lower()
+    for i in phrases:
         if fuzz.ratio(text,i)>max_fuzz:
             max_fuzz=fuzz.ratio(text,i)
 
@@ -110,6 +127,16 @@ def is_movie(text):
 
     else:
         return False
+
+
+def translator(text, tokenizer, model):
+
+    inputs = tokenizer.encode(text, return_tensors="pt")
+    outputs = model.generate(inputs)
+    translation = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
+    return translation
+
 
 API_TOKEN = config.TG_TOKEN
 
@@ -130,11 +157,24 @@ def text_handler(text, text_raw):
             return ("Ты по-моему что-то перепутал...")
 
     
-    elif is_movie(text_raw):
+    elif is_phrase(text_raw, film_phrase):
         return (f'Попробуй посмотреть этот..\n{pars.random_film(config.kp_token)}\n\n Если уже смотрел, то посмотри еще раз!')
 
+    elif is_phrase(text_raw, bye):
+        return "Всего хорошего!"
+    
+    elif "переведи" in text_raw.lower().split():
+        text_to_translate = text_raw.split()[1:]
+        text_to_translate = ' '.join(text_to_translate)
+        lang = detect(text_to_translate)
+        if lang == 'en':
+            return translator(text_to_translate, tokenizer_en, en_to_ru)
+        else:
+            return translator(text_to_translate, tokenizer_ru, ru_to_en)
+      
     else:
-        return (get_response(text, ft_index, model_ft, index_map, count_answer=10))
+        return (get_response(text, ft_index, model_ft, index_map, count_answer=7))
+        # return (get_response(text, w2v_index, modelW2V, index_map, count_answer=7))
 
 
 @dp.message_handler(commands=['start', 'help'])

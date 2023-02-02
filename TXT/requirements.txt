@@ -1,0 +1,11 @@
+aiogram==2.24
+annoy==1.17.1
+fuzzywuzzy==0.18.0
+gensim==4.2.0
+langdetect==1.0.9
+numpy==1.22.1
+pymorphy2==0.9.1
+requests==2.27.1
+stop_words==2018.7.23
+tqdm==4.64.0
+transformers==4.26.0
